@@ -77,6 +77,8 @@ def plot_county_choropleth(shp_file_path, data_df, county_fips_col, data_col, ti
     ax.set_xlim([-125, -66])
     ax.set_ylim([24, 50])
 
+    plt.tight_layout()
+
     plt.show()
 
 def plot_disparity_chloropleth(shp_file_path, cancer_df, county_fips_col, cancer_rate_col, title="Cancer Mortality Rate Disparity by US County",cmap="bwr_r"):

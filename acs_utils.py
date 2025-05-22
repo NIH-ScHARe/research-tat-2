@@ -3,7 +3,7 @@ import sys, os
 # Add the SCHARE-tools directory to the Python path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'SCHARE-tools')))
 
-from census_acs import get_educational_attainment
+from census_acs import get_educational_attainment, get_household_income
 
 def get_education_data(year, geography, as_percent=False):
     """
@@ -24,3 +24,23 @@ def get_education_data(year, geography, as_percent=False):
     education_data['FIPS'] = education_data['ucgid'].astype(str).str[-5:]
 
     return education_data
+
+def get_household_income_data(year, geography, as_percent=False):
+    """
+        Fetches educational attainment data from the ACS for a given year and geography.
+        
+        Args:
+            year (str): The year of the ACS data to fetch.
+            geography (str): The type of geography to fetch data for (e.g., 'county').
+            as_percent (bool): If True, returns the data as percentages. Defaults to False.
+        
+        Returns:
+            pd.DataFrame: A DataFrame containing the educational attainment data.
+        """
+    # Fetch the educational attainment data
+    income_data = get_household_income(year, geography, as_percent=as_percent)
+    
+    # Cleans the FIPS code by taking the last 5 characters of the ucgid column 
+    income_data['FIPS'] = income_data['ucgid'].astype(str).str[-5:]
+
+    return income_data

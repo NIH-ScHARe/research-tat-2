@@ -1,0 +1,4 @@
+# Ignore certain folders in the root ditectory
+maps/
+__pycache__/
+reference/

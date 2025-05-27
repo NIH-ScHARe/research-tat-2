@@ -11,9 +11,9 @@ def get_cancer_data(filepath):
     cancer_data = pd.read_csv(filepath,header=1)
 
     # Make sure the FIPS code is a string and zero-padded to 5 digits
-    cancer_data['County FIPS'] = cancer_data['County FIPS'].astype(str).str.zfill(5)
+    cancer_data['FIPS'] = cancer_data['County FIPS'].astype(str).str.zfill(5)
 
     # convert the cancer rate column to numeric, forcing errors to NaN
-    cancer_data['Age-Adjusted Rate per 100,000'] = pd.to_numeric(cancer_data['Age-Adjusted Rate per 100,000'], errors='coerce')
+    cancer_data['mortality_rate'] = pd.to_numeric(cancer_data['Age-Adjusted Rate per 100,000'], errors='coerce')
 
     return cancer_data

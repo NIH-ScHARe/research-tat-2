@@ -21,7 +21,8 @@ def get_education_data(year, geography, as_percent=False):
     education_data = get_educational_attainment(year, geography, as_percent=as_percent)
     
     # Cleans the FIPS code by taking the last 5 characters of the ucgid column 
-    education_data['FIPS'] = education_data['ucgid'].astype(str).str[-5:]
+    education_data['ucgid'] = education_data['ucgid'].astype(str).str[-5:]
+    education_data = education_data.rename(columns={'ucgid': 'FIPS'})
 
     return education_data
 
@@ -40,7 +41,8 @@ def get_household_income_data(year, geography, as_percent=False):
     # Fetch the educational attainment data
     income_data = get_household_income(year, geography, as_percent=as_percent)
     
-    # Cleans the FIPS code by taking the last 5 characters of the ucgid column 
-    income_data['FIPS'] = income_data['ucgid'].astype(str).str[-5:]
+    # Replace the ucgid column with its last 5 characters (FIPS code) and rename to FIPS
+    income_data['ucgid'] = income_data['ucgid'].astype(str).str[-5:]
+    income_data = income_data.rename(columns={'ucgid': 'FIPS'})
 
     return income_data

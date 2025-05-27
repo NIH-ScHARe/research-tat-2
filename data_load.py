@@ -1,6 +1,7 @@
-from acs_utils import get_education_data, get_household_income_data
 from gcs_utils import get_cancer_data
 from config import MORTALITY_ALL_RACES
+from acs_utils import get_education_data, get_household_income_data, get_computer_data, get_grapi_data, get_language_data 
+from cdc_utils import get_doctors_visit_data, get_self_care_disability_data, get_frequent_mental_distress_data
 
 def load_target():
 
@@ -11,6 +12,7 @@ def load_target():
     dataset = mortality_all_races[['FIPS','mortality_rate']]
 
     return dataset 
+
 
 def load_features(dataset):
     """
@@ -25,14 +27,36 @@ def load_features(dataset):
     
     # Load education data
     education_data = get_education_data('2022', 'county', as_percent=True)
-    
+    dataset = dataset.merge(education_data, on='FIPS', how='left')
+
     # Load household income data
     income_data = get_household_income_data('2022', 'county', as_percent=True)
-    
-    # Merge education and income data into the main dataset
-    dataset = dataset.merge(education_data, on='FIPS', how='left')
     dataset = dataset.merge(income_data, on='FIPS', how='left')
+
+    # Load computer and internet use data
+    computer_data = get_computer_data('2022', 'county', as_percent=True)
+    dataset = dataset.merge(computer_data, on='FIPS', how='left')
+
+    # Load rent burden data 
+    rent_burden_data = get_grapi_data('2022', 'county', as_percent=True)
+    dataset = dataset.merge(rent_burden_data, on='FIPS', how='left')
     
+    # Load language data 
+    language_data = get_language_data('2022', 'county', as_percent=True)
+    dataset = dataset.merge(language_data, on='FIPS', how='left')
+
+    # load doctor visit data 
+    doctor_visit_data = get_doctors_visit_data()
+    dataset = dataset.merge(doctor_visit_data, on='FIPS', how='left')
+
+    # load self-care disability data
+    self_care_disability_data = get_self_care_disability_data()
+    dataset = dataset.merge(self_care_disability_data, on='FIPS', how='left')
+
+    # load frequency mental distress data 
+    mental_distress_data = get_frequent_mental_distress_data()
+    dataset = dataset.merge(mental_distress_data, on='FIPS', how='left')
+
     # save raw dataset to CSV 
     dataset.to_csv('dataset_raw.csv', index=False)
 

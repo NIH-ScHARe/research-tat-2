@@ -3,7 +3,68 @@ import sys, os
 # Add the SCHARE-tools directory to the Python path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'SCHARE-tools')))
 
-from census_acs import get_educational_attainment, get_household_income
+from census_acs import get_educational_attainment, get_household_income, get_computer_and_internet_use, get_GRAPI, get_language_spoken_at_home
+
+def get_language_data(year, geography, as_percent=False):
+    """
+    Fetches the language spoken at home data from the ACS for a given year and geography.
+    Args:
+        year (str): The year of the ACS data to fetch.
+        geography (str): The type of geography to fetch data for (e.g., 'county').
+        as_percent (bool): If True, returns the data as percentages. Defaults to False. 
+    
+    Returns:
+        pd.DataFrame: A DataFrame containing the language spoken at home data.
+    """
+    # Fetch the language spoken at home data
+    language_data = get_language_spoken_at_home(year, geography, as_percent=as_percent)
+    
+    # Cleans the FIPS code by taking the last 5 characters of the ucgid column 
+    language_data['ucgid'] = language_data['ucgid'].astype(str).str[-5:]
+    language_data = language_data.rename(columns={'ucgid': 'FIPS'})
+
+    return language_data
+
+def get_grapi_data(year, geography, as_percent=False):
+    """
+    Fetches the Gross Rent as a Percentage of Income (GRAPI) data from the ACS for a given year and geography.
+    Args:
+        year (str): The year of the ACS data to fetch.
+        geography (str): The type of geography to fetch data for (e.g., 'county').
+        as_percent (bool): If True, returns the data as percentages. Defaults to False.
+    Returns:
+        pd.DataFrame: A DataFrame containing the GRAPI data.
+    """
+
+    # Fetch the GRAPI data
+    grapi_data = get_GRAPI(year, geography, as_percent=as_percent)
+    
+    # Cleans the FIPS code by taking the last 5 characters of the ucgid column 
+    grapi_data['ucgid'] = grapi_data['ucgid'].astype(str).str[-5:]
+    grapi_data = grapi_data.rename(columns={'ucgid': 'FIPS'})
+
+    return grapi_data
+
+def get_computer_data(year, geography, as_percent=False):
+    """
+    Fetches educational attainment data from the ACS for a given year and geography.
+    
+    Args:
+        year (str): The year of the ACS data to fetch.
+        geography (str): The type of geography to fetch data for (e.g., 'county').
+        as_percent (bool): If True, returns the data as percentages. Defaults to False.
+    
+    Returns:
+        pd.DataFrame: A DataFrame containing the educational attainment data.
+    """
+    # Fetch the educational attainment data
+    computer_data = get_computer_and_internet_use(year, geography, as_percent=as_percent)
+    
+    # Cleans the FIPS code by taking the last 5 characters of the ucgid column 
+    computer_data['ucgid'] = computer_data['ucgid'].astype(str).str[-5:]
+    computer_data = computer_data.rename(columns={'ucgid': 'FIPS'})
+
+    return computer_data
 
 def get_education_data(year, geography, as_percent=False):
     """

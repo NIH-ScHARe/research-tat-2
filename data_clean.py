@@ -34,6 +34,8 @@ def clean_features(data):
     Returns:
         pd.DataFrame: The DataFrame with missing values in numeric columns filled with the median of each column.
     """
+    # make a copy of the data to avoid modifying the original DataFrame
+    data = data.copy()
 
     # get names of feature columns 
     feature_columns = data.columns[2::]
@@ -45,7 +47,7 @@ def clean_features(data):
 
     return data
 
-def clean_dataset():
+def clean_dataset(raw_dataset):
     """
     Clean the dataset by removing rows with missing values in the 'mortality_rate' column.
     
@@ -56,9 +58,6 @@ def clean_dataset():
         pd.DataFrame: The cleaned dataset with rows containing NaN in 'mortality_rate' removed.
     """
 
-    # load the raw dataset
-    raw_dataset = pd.read_csv('dataset_raw.csv')
-
     # clean the target feature 
     target_cleaned = clean_target_feature(raw_dataset, 'mortality_rate')
 
@@ -67,6 +66,3 @@ def clean_dataset():
     
     return feature_cleaned 
 
-dataset = clean_dataset()
-# save the cleaned dataset to CSV
-dataset.to_csv('dataset_cleaned.csv', index=False)

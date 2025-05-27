@@ -2,3 +2,6 @@
 maps/
 __pycache__/
 reference/
+
+# Ignore CSV files 
+*.csv

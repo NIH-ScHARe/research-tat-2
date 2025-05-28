@@ -14,5 +14,6 @@ MORTALITY_BLACK = 'gs://fc-7e6318d6-64fb-420a-b061-37ab0415d42f/data/Mortality_U
 MORTALITY_WHITE = 'gs://fc-7e6318d6-64fb-420a-b061-37ab0415d42f/data/Mortality_US_by_County_Non-Hispanic_White_All_Causes_of_Death_(Both_Sexes)_2018_-_2022.csv'
 
 # chloropleth cancer map min and max
+SHP_FILE_PATH = "maps/tl_2022_us_county.shp"
 MORTALITY_MIN = 0 
 MORTALITY_MAX = 2500 

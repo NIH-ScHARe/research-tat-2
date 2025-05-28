@@ -1,11 +1,12 @@
-from mapping import plot_county_choropleth
+from maps_utils import plot_county_choropleth
 from acs_utils import get_education_data
+from config import SHP_FILE_PATH
 
 def chloropleth_each_education_level(education_data, data_cols):
 
     # Loop through each column and plot the data
     for col in data_cols:
-        plot_county_choropleth("maps/tl_2022_us_county.shp",
+        plot_county_choropleth(SHP_FILE_PATH,
                                 education_data, 
                                 "FIPS", 
                                 col,

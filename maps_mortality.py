@@ -1,5 +1,5 @@
 from gcs_utils import get_cancer_data
-from mapping import plot_county_choropleth, plot_disparity_chloropleth
+from maps_utils import plot_county_choropleth, plot_disparity_chloropleth
 from data_process import compute_disparity
 from config import (
     MORTALITY_ALL_RACES,

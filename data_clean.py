@@ -64,5 +64,8 @@ def clean_dataset(raw_dataset):
     # clean the features 
     feature_cleaned = clean_features(target_cleaned)
     
+    # save cleaned dataset to csv
+    feature_cleaned.to_csv('dataset_cleaned.csv', index=False)
+
     return feature_cleaned 
 

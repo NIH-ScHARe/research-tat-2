@@ -1,4 +1,5 @@
 import sys, os
+import pandas as pd 
 
 # Add the SCHARE-tools directory to the Python path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'SCHARE-tools')))
@@ -43,6 +44,12 @@ def get_grapi_data(year, geography, as_percent=False):
     grapi_data['ucgid'] = grapi_data['ucgid'].astype(str).str[-5:]
     grapi_data = grapi_data.rename(columns={'ucgid': 'FIPS'})
 
+    # convert the other columns to numeric 
+    for col in grapi_data.columns[1:]:
+        grapi_data[col] = pd.to_numeric(grapi_data[col], errors='coerce')
+        grapi_data.loc[grapi_data[col] < 0, col] = pd.NA
+
+    
     return grapi_data
 
 def get_computer_data(year, geography, as_percent=False):

@@ -37,8 +37,8 @@ def clean_features(data):
     # make a copy of the data to avoid modifying the original DataFrame
     data = data.copy()
 
-    # get names of feature columns 
-    feature_columns = data.columns[2::]
+    # get names of feature columns (all columns except 'FIPS')
+    feature_columns = [col for col in data.columns if col != 'FIPS']
     
     # fill NaN values in feature columns with the median of each column
     for column in feature_columns:

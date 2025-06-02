@@ -1,10 +1,5 @@
-import sys, os
 import pandas as pd 
-
-# Add the SCHARE-tools directory to the Python path
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'SCHARE-tools')))
-
-from census_acs import get_educational_attainment, get_household_income, get_computer_and_internet_use, get_GRAPI, get_language_spoken_at_home
+from fedwrap.census_acs import get_educational_attainment, get_household_income, get_computer_and_internet_use, get_GRAPI, get_language_spoken_at_home
 
 def get_language_data(year, geography, as_percent=False):
     """

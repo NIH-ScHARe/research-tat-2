@@ -5,3 +5,6 @@ reference/
 
 # Ignore CSV files 
 *.csv
+
+# ignore virtual environment 
+.venv/ 

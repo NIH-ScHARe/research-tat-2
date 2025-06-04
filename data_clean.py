@@ -23,6 +23,11 @@ def clean_target_feature(data, column_name):
     Returns:
         pd.DataFrame: The DataFrame with rows containing NaN in the specified column removed.    
     """
+
+    # count the number of null rows in target feature 
+    num_null = data[column_name].isnull().sum()
+    print(f"Number of null columns for column {column_name}: {num_null}")
+
     return data.dropna(subset=column_name)
 
 def clean_features(data):
@@ -42,8 +47,15 @@ def clean_features(data):
     
     # fill NaN values in feature columns with the median of each column
     for column in feature_columns:
+
+        num_null = data[column].isnull().sum()
+        print(f"Number of null columns for column {column}: {num_null}")
+
         if data[column].dtype in ['float64', 'int64']:
-            data[column] = data[column].fillna(data[column].median())
+            median_value = data[column].median()
+
+            print(f"Column is numeric. Filling with median value: {median_value}")
+            data[column] = data[column].fillna(median_value)
 
     return data
 

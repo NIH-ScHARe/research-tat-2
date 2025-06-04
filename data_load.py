@@ -1,7 +1,7 @@
 from gcs_utils import get_cancer_data
 from config import MORTALITY_ALL_RACES
 from acs_utils import get_education_data, get_household_income_data, get_computer_data, get_grapi_data, get_language_data 
-from cdc_utils import get_doctors_visit_data, get_self_care_disability_data, get_frequent_mental_distress_data
+from cdc_utils import fetch_places_data
 
 def load_target():
 
@@ -22,40 +22,83 @@ def load_features(dataset):
         dataset (pd.DataFrame): The initial dataset containing FIPS and mortality rate.
         
     Returns:
-        pd.DataFrame: The dataset enriched with education and income features.
+        pd.DataFrame: The dataset enriched with features to be used for prediction.
     """
     
     # Load education data
+    print('Loading education data...')
     education_data = get_education_data('2022', 'county', as_percent=True)
     dataset = dataset.merge(education_data, on='FIPS', how='left')
 
     # Load household income data
+    print('Loading household income data...')
     income_data = get_household_income_data('2022', 'county', as_percent=True)
     dataset = dataset.merge(income_data, on='FIPS', how='left')
 
     # Load computer and internet use data
+    print('Loading computer and internet use data...')
     computer_data = get_computer_data('2022', 'county', as_percent=True)
     dataset = dataset.merge(computer_data, on='FIPS', how='left')
 
     # Load rent burden data 
+    print('Loading rent burden data...')
     rent_burden_data = get_grapi_data('2022', 'county', as_percent=True)
     dataset = dataset.merge(rent_burden_data, on='FIPS', how='left')
     
     # Load language data 
+    print('Loading language data...')
     language_data = get_language_data('2022', 'county', as_percent=True)
     dataset = dataset.merge(language_data, on='FIPS', how='left')
 
     # load doctor visit data 
-    doctor_visit_data = get_doctors_visit_data()
+    print('Loading doctor visit data...')
+    doctor_visit_data = fetch_places_data('county', '2022', 'CHECKUP', 'AgeAdjPrv')
     dataset = dataset.merge(doctor_visit_data, on='FIPS', how='left')
 
     # load self-care disability data
-    self_care_disability_data = get_self_care_disability_data()
+    print('Loading self-care disability data...')
+    self_care_disability_data = fetch_places_data('county', '2022', 'SELFCARE', 'AgeAdjPrv')
     dataset = dataset.merge(self_care_disability_data, on='FIPS', how='left')
 
     # load frequency mental distress data 
-    mental_distress_data = get_frequent_mental_distress_data()
+    print('Loading frequent mental distress data...')
+    mental_distress_data = fetch_places_data('county', '2022', 'MHLTH', 'AgeAdjPrv')
     dataset = dataset.merge(mental_distress_data, on='FIPS', how='left')
+
+    # load health insurance access data 
+    print('Loading health insurance access data...')
+    health_insurance_data = fetch_places_data('county', '2022', 'ACCESS2', 'AgeAdjPrv')
+    dataset = dataset.merge(health_insurance_data, on='FIPS', how='left')
+
+    # load independent living disability data
+    print('Loading independent living disability data...')
+    independent_living_data = fetch_places_data('county', '2022', 'INDEPLIVE', 'AgeAdjPrv')    
+    dataset = dataset.merge(independent_living_data, on='FIPS', how='left')
+
+    # load social isolation data
+    print('Loading social isolation data...')
+    social_isolation_data = fetch_places_data('county', '2022', 'ISOLATION', 'AgeAdjPrv')
+    dataset = dataset.merge(social_isolation_data, on='FIPS', how='left')
+
+    # load food insecurity data
+    print('Loading food insecurity data...')
+    food_insecurity_data = fetch_places_data('county', '2022', 'FOODINSECU', 'AgeAdjPrv')
+    dataset = dataset.merge(food_insecurity_data, on='FIPS', how='left')
+
+    # load housing insecurity data
+    print('Loading housing insecurity data...')
+    housing_insecurity_data = fetch_places_data('county', '2022', 'HOUSINSECU', 'AgeAdjPrv')
+    dataset = dataset.merge(housing_insecurity_data, on='FIPS', how='left')
+
+    # load lack of reliable transportation data
+    print('Loading lack of reliable transportation data...')
+    lack_transportation_data = fetch_places_data('county', '2022', 'LACKTRPT', 'AgeAdjPrv')    
+    dataset = dataset.merge(lack_transportation_data, on='FIPS', how='left')
+
+    # load lack of emotional support data
+    print('Loading lack of emotional support data...')
+    lack_emotional_support_data = fetch_places_data('county', '2022', 'EMOTIONSPT', 'AgeAdjPrv')
+    dataset = dataset.merge(lack_emotional_support_data, on='FIPS', how='left')
 
     # save raw dataset to CSV 
     dataset.to_csv('dataset_raw.csv', index=False)

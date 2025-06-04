@@ -1,4 +1,4 @@
-from cdc_utils import get_doctors_visit_data, get_self_care_disability_data, get_frequent_mental_distress_data
+from cdc_utils import fetch_places_data
 from acs_utils import get_household_income_data, get_computer_data, get_grapi_data, get_language_data
 from maps_utils import plot_county_choropleth
 from config import SHP_FILE_PATH
@@ -6,7 +6,7 @@ from config import SHP_FILE_PATH
 def doctor_visit_map():
 
     # load doctor visit data
-    doctor_visit_data = get_doctors_visit_data()
+    doctor_visit_data = fetch_places_data('county', '2022', 'CHECKUP', 'AgeAdjPrv')
     
     # create chloropleth map of doctor visit rates by county
     plot_county_choropleth(SHP_FILE_PATH, doctor_visit_data, 'FIPS', 'doctor_visit_rate', 
@@ -15,7 +15,7 @@ def doctor_visit_map():
 def self_care_disability_map():
 
     # load doctor visit data
-    self_care_disability_data = get_self_care_disability_data()
+    self_care_disability_data = fetch_places_data('county', '2022', 'SELFCARE', 'AgeAdjPrv')
     
     # create chloropleth map of doctor visit rates by county
     plot_county_choropleth(SHP_FILE_PATH, self_care_disability_data, 'FIPS', 'self_care_disability_rate', 
@@ -24,11 +24,26 @@ def self_care_disability_map():
 def frequenct_mental_distress_map():
 
     # load doctor visit data
-    frequent_mental_distress_data = get_frequent_mental_distress_data()
+    frequent_mental_distress_data = fetch_places_data('county', '2022', 'MHLTH', 'AgeAdjPrv')
     
     # create chloropleth map of doctor visit rates by county
     plot_county_choropleth(SHP_FILE_PATH, frequent_mental_distress_data, 'FIPS', 'frequent_mental_distress_rate', 
                            title='Frequent Mental Distress Rate by County', cmap='Blues') 
+
+def health_insurance_data_map():
+
+    # load health insurance dataset 
+    health_insurance_data = fetch_places_data('county', '2022', 'ACCESS2', 'AgeAdjPrv')
+
+    # create chloropleth map
+    plot_county_choropleth(SHP_FILE_PATH, 
+                           health_insurance_data, 
+                           'FIPS', 
+                           'health_insurance_access_rate', 
+                           title='Lack of health insurance among adults aged 18-64 years by County', 
+                           cmap='Blues',
+                           vmin=0,
+                           vmax=100)
 
 def income_maps():
     # load household income data
@@ -102,4 +117,19 @@ def language_maps():
                                vmin=0,
                                vmax=100)
 
-language_maps()
+def independent_living_disability_data_map():
+
+    # load health insurance dataset 
+    independent_living_data = fetch_places_data('county', '2022', 'INDEPLIVE', 'AgeAdjPrv')
+
+    # create chloropleth map
+    plot_county_choropleth(SHP_FILE_PATH, 
+                           independent_living_data, 
+                           'FIPS', 
+                           'independent_living_disability_rate', 
+                           title='Independent living disability among adults by County', 
+                           cmap='Blues',
+                           vmin=0,
+                           vmax=100)
+
+independent_living_disability_data_map()

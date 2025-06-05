@@ -1,4 +1,3 @@
-import pandas as pd 
 from data_load import load_target, load_features
 from data_clean import clean_dataset 
 from data_split import split_dataset
@@ -24,12 +23,3 @@ if __name__ == "__main__":
 
     # train and evaluate the model 
     train_eval_model(X_train, X_val, y_train, y_val)
-
-    # print(dataset.columns)
-
-    # education_data = get_education_data('2022', 'county', as_percent=True)
-    # income_data = get_household_income_data('2022', 'county', as_percent=True)
-
-
-    
-

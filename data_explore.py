@@ -35,8 +35,10 @@ def explore_raw_data():
     # Load the raw dataset
     raw_data = pd.read_csv('dataset_raw.csv')
 
-    for col in raw_data.columns:
-        plot_distribution(raw_data, col) 
+    # for col in raw_data.columns:
+    #     plot_distribution(raw_data, col)
+
+    plot_distribution(raw_data,'marketplace_percent') 
 
 def explore_cleaned_data():
 

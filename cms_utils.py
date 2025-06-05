@@ -26,6 +26,12 @@ def get_all_drupal_api_items(base_url, total_pages, limit=1000):
     
     return pd.DataFrame(all_items)
 
+def get_county_population_data():
+
+    population_data = get_total_pop("2022","county")
+    population_data['ucgid'] = population_data['ucgid'].astype(str).str[-5:]
+    return population_data.rename(columns={'ucgid': 'FIPS'})
+
 def get_medicare_data():
 
     # set URL to get Medicare data by county for 2022
@@ -42,9 +48,7 @@ def get_medicare_data():
     medicare_data["MA_AND_OTH_BENES"] = pd.to_numeric(medicare_data["MA_AND_OTH_BENES"], errors="coerce").astype("float64")
 
     # get population by county for 2022
-    population_data = get_total_pop("2022","county")
-    population_data['ucgid'] = population_data['ucgid'].astype(str).str[-5:]
-    population_data = population_data.rename(columns={'ucgid': 'FIPS'})
+    population_data = get_county_population_data()
 
     # merge medicare data with population data 
     population_data = population_data.merge(medicare_data, on='FIPS', how='left')
@@ -62,4 +66,41 @@ def get_medicare_data():
 
     # Drop columns and return 
     return population_data.drop(columns=['Total population', 'TOT_BENES', 'ORGNL_MDCR_BENES', 'MA_AND_OTH_BENES'])
+
+def clean_marketplace_data():
+
+    marketplace_data = pd.read_csv("data/marketplace_enrollment_2022.csv")
+
+    # convert FIPS to string and pad 0s 
+    marketplace_data['County_FIPS_Cd'] = marketplace_data['County_FIPS_Cd'].astype(str).str.zfill(5)
+
+    # convert enrollees to float64
+    marketplace_data['Cnsmr'] = marketplace_data['Cnsmr'].str.replace(',', '', regex=False)
+    marketplace_data['Cnsmr'] = pd.to_numeric(marketplace_data["Cnsmr"], errors="coerce").astype("float64")
+
+    # rename columns
+    marketplace_data = marketplace_data.rename(columns={'County_FIPS_Cd':'FIPS'})
+    marketplace_data = marketplace_data.rename(columns={'Cnsmr':'marketplace_enrollees'})
+
+    # keep relevant columns 
+    return marketplace_data[['FIPS', 'marketplace_enrollees']]
+
+def get_marketplace_data():
+
+    # get marketplace data 
+    marketplace_data = clean_marketplace_data()
+
+    # get population by county for 2022
+    population_data = get_county_population_data()
+
+    # merge
+    population_data = population_data.merge(marketplace_data, on='FIPS', how='left')
+
+    # divide to get percent of population on TM and MA
+    population_data["marketplace_percent"] = (
+        population_data["marketplace_enrollees"] / population_data["Total population"] * 100
+    ).round(1)
+
+
+    return population_data[['FIPS','marketplace_percent']]
 

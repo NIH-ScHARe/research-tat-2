@@ -2,6 +2,7 @@ from gcs_utils import get_cancer_data
 from config import MORTALITY_ALL_RACES
 from acs_utils import get_education_data, get_household_income_data, get_computer_data, get_grapi_data, get_language_data 
 from cdc_utils import fetch_places_data
+from cms_utils import get_medicare_data
 
 def load_target():
 
@@ -99,6 +100,11 @@ def load_features(dataset):
     print('Loading lack of emotional support data...')
     lack_emotional_support_data = fetch_places_data('county', '2022', 'EMOTIONSPT', 'AgeAdjPrv')
     dataset = dataset.merge(lack_emotional_support_data, on='FIPS', how='left')
+
+    # load Medicare data 
+    print('Loading Medicare data...')
+    medicare_data = get_medicare_data()
+    dataset = dataset.merge(medicare_data, on='FIPS', how='left')
 
     # save raw dataset to CSV 
     dataset.to_csv('dataset_raw.csv', index=False)

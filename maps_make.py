@@ -1,5 +1,6 @@
 from cdc_utils import fetch_places_data
 from acs_utils import get_household_income_data, get_computer_data, get_grapi_data, get_language_data
+from cms_utils import get_medicare_data
 from maps_utils import plot_county_choropleth
 from config import SHP_FILE_PATH
 
@@ -131,5 +132,48 @@ def independent_living_disability_data_map():
                            cmap='Blues',
                            vmin=0,
                            vmax=100)
+    
+def total_medicare_map():
 
-independent_living_disability_data_map()
+    # load health insurance dataset 
+    medicare_data = get_medicare_data()
+
+    # create chloropleth map
+    plot_county_choropleth(SHP_FILE_PATH, 
+                           medicare_data, 
+                           'FIPS', 
+                           'total_medicare_percent', 
+                           title='Percent of population on Medicare by County, 2022', 
+                           cmap='Blues',
+                           vmin=0,
+                           vmax=100)
+
+def traditional_medicare_map():
+
+    # load health insurance dataset 
+    medicare_data = get_medicare_data()
+
+    # create chloropleth map
+    plot_county_choropleth(SHP_FILE_PATH, 
+                           medicare_data, 
+                           'FIPS', 
+                           'original_medicare_percent', 
+                           title='Percent of population on Traditional Medicare by County, 2022', 
+                           cmap='Blues',
+                           vmin=0,
+                           vmax=100)
+
+def medicare_advantage_map():
+
+    # load health insurance dataset 
+    medicare_data = get_medicare_data()
+
+    # create chloropleth map
+    plot_county_choropleth(SHP_FILE_PATH, 
+                           medicare_data, 
+                           'FIPS', 
+                           'medicare_advantage_percent', 
+                           title='Percent of population on Medicare Advantage by County, 2022', 
+                           cmap='Blues',
+                           vmin=0,
+                           vmax=100)

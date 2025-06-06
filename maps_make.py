@@ -1,6 +1,6 @@
 from cdc_utils import fetch_places_data
 from acs_utils import get_household_income_data, get_computer_data, get_grapi_data, get_language_data
-from cms_utils import get_medicare_data, get_marketplace_data
+from cms_utils import get_medicare_data, get_marketplace_data, get_dual_enrollee_data
 from maps_utils import plot_county_choropleth
 from config import SHP_FILE_PATH
 
@@ -192,5 +192,20 @@ def marketplace_insurance_map():
                            cmap='Blues',
                            vmin=0,
                            vmax=100)
-    
-marketplace_insurance_map()
+
+def dual_enrollee_map():
+
+    # load health insurance dataset 
+    dual_enrollee_data = get_dual_enrollee_data()
+
+    # create chloropleth map
+    plot_county_choropleth(SHP_FILE_PATH, 
+                           dual_enrollee_data, 
+                           'FIPS', 
+                           'dual_enrollee_percent', 
+                           title='Percent of population Dual Enrolled by County, 2022', 
+                           cmap='Blues',
+                           vmin=0,
+                           vmax=100)
+
+dual_enrollee_map()

@@ -38,7 +38,7 @@ def explore_raw_data():
     # for col in raw_data.columns:
     #     plot_distribution(raw_data, col)
 
-    plot_distribution(raw_data,'marketplace_percent') 
+    plot_distribution(raw_data,'dual_enrollee_percent') 
 
 def explore_cleaned_data():
 

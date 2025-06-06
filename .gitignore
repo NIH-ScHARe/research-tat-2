@@ -2,6 +2,7 @@
 maps/
 __pycache__/
 reference/
+data/
 
 # Ignore CSV files 
 *.csv

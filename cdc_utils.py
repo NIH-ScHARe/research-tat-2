@@ -4,7 +4,7 @@ from fedwrap.cdc_places import get_places_data
 def clean_places_data(df, column_name):
 
     # keep only relevant columns
-    df = df[['locationid', 'data_value']]
+    df = df[['locationid', 'data_value']].copy()
 
     # make data value column numeric 
     df['data_value'] = pd.to_numeric(df['data_value'], errors='coerce')

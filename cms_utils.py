@@ -1,6 +1,9 @@
 import requests 
 import pandas as pd 
 from fedwrap.census_acs import get_total_pop
+import us
+import numpy as np 
+import os 
 
 def get_all_drupal_api_items(base_url, total_pages, limit=1000):
     """
@@ -104,3 +107,102 @@ def get_marketplace_data():
 
     return population_data[['FIPS','marketplace_percent']]
 
+def get_dual_enrollee_data():
+
+    dual_enrollee_data = pd.read_csv('data/cms_dual_enrollees/county_totals.csv')
+    dual_enrollee_data['FIPS'] = dual_enrollee_data['FIPS'].astype(str)
+
+    # get population by county for 2022
+    population_data = get_county_population_data()
+
+    # merge
+    population_data = population_data.merge(dual_enrollee_data, on='FIPS', how='left')
+
+    # divide to get percent of population on TM and MA
+    population_data["dual_enrollee_percent"] = (
+        population_data["total"] / population_data["Total population"] * 100
+    ).round(1)
+
+    return population_data[['FIPS','dual_enrollee_percent']]
+
+
+def clean_quarterly_data(filepath):
+
+    df = pd.read_csv(filepath,header=2)
+    df = df[['State of Beneficiary','County of Beneficiary','Total']]
+    df['county, state'] = df['County of Beneficiary'] + ', ' + df['State of Beneficiary']
+    df = df.rename(columns={'Total':'total'})
+    df['total'] = df['total'].str.replace(',','',regex=False)
+    df['total'] = df['total'].replace('*', '0')
+    df['total'] = pd.to_numeric(df["total"], errors="coerce").astype("float64")
+    df['total'] = df['total'].replace(0.0, np.nan)
+
+    total_name = 'total_' + filepath.split('/')[2].split('_')[0]
+    df = df.rename(columns={'total':total_name})
+    return df[['county, state',total_name]]
+
+def prepare_dual_enrollee_data():
+
+    folder_path = 'data/cms_dual_enrollees'
+
+    quarterly_totals = clean_quarterly_data('data/cms_dual_enrollees/q1_county.csv')
+
+    # read in FIPS data 
+    for file in os.listdir(folder_path)[1:]:
+        
+        filepath = folder_path + '/' + file
+
+        df = clean_quarterly_data(filepath)
+
+        quarterly_totals = pd.merge(quarterly_totals,df,how='outer',on='county, state')
+
+    quarterly_totals['total'] = quarterly_totals[['total_q1', 'total_q2', 'total_q3', 'total_q4']].mean(axis=1).round(0)
+
+    county_totals = quarterly_totals[['county, state','total']].copy()
+    county_totals['county'] = quarterly_totals['county, state'].str.split(',').str[0].str.strip()
+    county_totals['state'] = quarterly_totals['county, state'].str.split(',').str[1].str.strip()
+
+    county_totals.to_csv('data/cms_dual_enrollees/county_totals.csv',index=False)
+
+def get_fips(row):
+    
+    # print(f'assessing {row['County of Beneficiary']}')
+
+    fips_county = pd.read_csv("data/county_fips.csv")
+
+    # narrow down county list to matching state 
+    matching_rows = fips_county[fips_county["State Abbr"] == row["state"]] 
+    
+    # Assume matching_rows is a DataFrame and row is a Series from another DataFrame
+    result_row = matching_rows[matching_rows['County Name'].str.contains(row['county'], case=False, na=False)]
+
+    # find the matching county 
+    first_match = result_row.iloc[0] if not result_row.empty else None
+
+    if first_match is not None:
+        print(f"{row['county, state']}, matched to {first_match['County Name']}")
+    else:
+        print(f"no match for {row['county, state']}")
+
+    if first_match is not None:
+        return first_match['County FIPS code']
+    else:
+        return '99999'
+
+def match_FIPS():
+
+    county_totals = pd.read_csv('data/cms_dual_enrollees/county_totals.csv')
+
+    # match each county, state combination to its FIPS code 
+    county_totals['FIPS'] = county_totals.apply(get_fips,axis=1)
+    print(county_totals.head(10))
+
+    county_totals.to_csv('data/cms_dual_enrollees/county_totals.csv',index=False)
+
+def check_FIPS():
+
+    county_totals = pd.read_csv('data/cms_dual_enrollees/county_totals.csv')
+
+    county_totals['FIPS'] = county_totals['FIPS'].astype(str).str.zfill(5)
+
+    county_totals.to_csv('data/cms_dual_enrollees/county_totals.csv')

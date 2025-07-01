@@ -1,11 +1,69 @@
 import numpy as np 
 import pandas as pd 
-from sklearn.ensemble import RandomForestRegressor
+from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
 from sklearn.linear_model import ElasticNet
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 import matplotlib.pyplot as plt
+from xgboost import XGBRegressor
 
 # Assume X_train, X_test, y_train, y_test are already defined
+
+def train_XGBR(X_train, y_train):
+    """
+    Train an XGBoost Regressor and evaluate its performance on training and test sets.
+
+    Args:
+        X_train (pd.DataFrame or np.ndarray): Training feature matrix.
+        y_train (pd.Series or np.ndarray): Training target vector.
+
+    Returns:
+        model: Trained XGBoost Regressor.
+    """
+    
+    # 1. Train the XGBoost Regressor
+    # xgbr = XGBRegressor(n_estimators=100, learning_rate=0.1, max_depth=6)
+    xgbr = XGBRegressor(
+        objective='reg:tweedie', # more robust to outliers than square error 
+        n_estimators=50,         # Reduce from 100+ to 50
+        learning_rate=0.05,      # Reduce from 0.1 to 0.05 
+        max_depth=3,             # Reduce from 6+ to 3-4
+        min_child_weight=10,     # Increase from 1 to 10
+        subsample=0.8,           # Use only 80% of samples per tree
+        colsample_bytree=0.8,    # Use only 80% of features per split
+        random_state=42
+    )
+    xgbr.fit(X_train, y_train)
+
+    return xgbr
+
+def train_GBR(X_train, y_train):
+    """
+    Train a Gradient Boosting Regressor and evaluate its performance on training and test sets.
+
+    Args:
+        X_train (pd.DataFrame or np.ndarray): Training feature matrix.
+        y_train (pd.Series or np.ndarray): Training target vector.
+
+    Returns:
+        model: Trained Gradient Boosting Regressor.
+    """
+    
+    # 1. Train the Gradient Boosting Regressor
+    gbr = GradientBoostingRegressor(
+        loss='huber',
+        alpha=0.9,               # Use Huber loss with alpha=0.9
+        n_estimators=50,         # Reduce from 100+ to 50
+        learning_rate=0.05,      # Reduce from 0.1 to 0.05 
+        max_depth=3,             # Reduce from 6+ to 3-4
+        min_samples_split=20,    # Increase from 2 to 20
+        min_samples_leaf=10,     # Increase from 1 to 10
+        subsample=0.8,           # Use only 80% of samples per tree
+        max_features='sqrt',     # Use only sqrt(n_features) per split
+        random_state=42
+    )
+    gbr.fit(X_train, y_train)
+
+    return gbr
 
 def train_RFR(X_train, y_train):
     """

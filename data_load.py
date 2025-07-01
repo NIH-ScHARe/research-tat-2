@@ -1,6 +1,6 @@
 from gcs_utils import get_cancer_data
 from config import MORTALITY_ALL_RACES
-from acs_utils import get_education_data, get_household_income_data, get_computer_data, get_grapi_data, get_language_data, get_private_insurance_data 
+from acs_utils import get_education_data, get_household_income_data, get_computer_data, get_grapi_data, get_language_data, get_private_insurance_data, get_public_insurance_data
 from cdc_utils import fetch_places_data
 from cms_utils import get_medicare_data, get_marketplace_data, get_dual_enrollee_data
 
@@ -120,6 +120,11 @@ def load_features(dataset):
     print('Loading private insurance data...')
     private_insurance_data = get_private_insurance_data()
     dataset = dataset.merge(private_insurance_data, on='FIPS', how='left')
+
+    # load public insurance data 
+    print('Loading public insurance data...')
+    public_insurance_data = get_public_insurance_data()
+    dataset = dataset.merge(public_insurance_data, on='FIPS', how='left')
 
     # save raw dataset to CSV 
     dataset.to_csv('dataset_raw.csv', index=False)

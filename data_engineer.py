@@ -102,17 +102,31 @@ def engineer_GRAPI(data,drop):
 
 def engineer_private_insurance(data,drop):
 
-    data['private_insurance_total'] = (data['Employer-based health insurance alone'] + 
-                                 data['Direct-purchase health insurance alone'] + 
-                                 data['Tricare/military health coverage alone'])
+    data['private_insurance_total'] = (data['Employer-based health insurance alone or in combination'] + 
+                                 data['Direct-purchase health insurance alone or in combination'] + 
+                                 data['Tricare/military health insurance alone or in combination'])
     
-    data['economic_stability_ratio'] = data['Employer-based health insurance alone'] / (data['Direct-purchase health insurance alone'] + 1)
-    data['economic_vulnerability_ratio'] = data['Employer-based health insurance alone'] / data['private_insurance_total']
+    data['economic_stability_ratio'] = data['Employer-based health insurance alone or in combination'] / (data['Direct-purchase health insurance alone or in combination'] + 1)
+    data['economic_vulnerability_ratio'] = data['Employer-based health insurance alone or in combination'] / data['private_insurance_total']
 
     if drop:
-        data.drop(columns=['Employer-based health insurance alone',
-                           'Direct-purchase health insurance alone',
-                           'Tricare/military health coverage alone'], inplace=True)
+        data.drop(columns=['Employer-based health insurance alone or in combination',
+                           'Direct-purchase health insurance alone or in combination',
+                           'Tricare/military health insurance alone or in combination'], inplace=True)
+    
+    return data
+
+def engineer_public_insurance(data,drop):
+
+    data['public_insurance_total'] = (data['Medicare coverage alone or in combination'] + 
+                                      data['Medicaid/means-tested public coverage alone or in combination'] + 
+                                      data['VA health care coverage alone or in combination'])
+
+    
+    if drop:
+        data.drop(columns=['Medicare coverage alone or in combination',
+                           'Medicaid/means-tested public coverage alone or in combination',
+                           'VA health care coverage alone or in combination'], inplace=True)
     
     return data
 
@@ -131,5 +145,6 @@ def engineer_all(data, drop=True):
     data = engineer_income(data, drop=drop)
     data = engineer_GRAPI(data, drop=drop)
     data = engineer_private_insurance(data, drop=drop)
+    data = engineer_public_insurance(data, drop=drop)
     
     return data

@@ -1,10 +1,11 @@
 import pandas as pd 
 from data_clean import clean_dataset 
 from data_split import split_dataset
-from data_train import train_elastic_net, train_RFR, evaluate_model
+from data_train import train_elastic_net, train_RFR, train_GBR, train_XGBR, evaluate_model
 from data_engineer import engineer_all
-from sklearn.ensemble import RandomForestRegressor
-from sklearn.preprocessing import StandardScaler
+from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
+from xgboost import XGBRegressor
+from sklearn.preprocessing import StandardScaler, RobustScaler
 from sklearn.feature_selection import SelectKBest, f_regression, SelectFromModel
 
 from data_explore import feature_correlation
@@ -49,9 +50,12 @@ features = ['Less than 9th grade',
             'lack_reliable_transportation_rate',
             'lack_emotional_support_rate',
             'total_medicare_percent',
-            'Employer-based health insurance alone',
-            'Direct-purchase health insurance alone',
-            'Tricare/military health coverage alone']
+            'Employer-based health insurance alone or in combination',
+            'Direct-purchase health insurance alone or in combination',
+            'Tricare/military health insurance alone or in combination',
+            'Medicare coverage alone or in combination',
+            'Medicaid/means-tested public coverage alone or in combination',
+            'VA health care coverage alone or in combination']
 subset = raw_data[[id, target] + features].copy()
 
 # drop rows with missing target values 
@@ -62,7 +66,7 @@ subset.dropna(subset='mortality_rate',inplace=True)
 
 # fill missing data with median imputation 
 for feature in features:
-    print(f"Number of null columns for column {feature}: {subset[feature].isnull().sum()}")
+    # print(f"Number of null columns for column {feature}: {subset[feature].isnull().sum()}")
     subset.fillna({feature: subset[feature].median()}, inplace=True)
 
 # examine correaltion after imputation
@@ -71,27 +75,33 @@ for feature in features:
 # create copy of data for each model 
 subset_rfr = subset.copy()
 subset_en = subset.copy()
+subset_gbr = subset.copy()
+subset_xgbr = subset.copy()
 
 # address outliers 
 
 # FEATURE ENGINEERING 
 subset_en = engineer_all(subset_en, drop=True)
 subset_rfr = engineer_all(subset_rfr, drop=False)
+subset_gbr = engineer_all(subset_gbr, drop=False)
+subset_xgbr = engineer_all(subset_xgbr, drop=False)
 
+# Elastic Net Regression
 # split data 
 X_train, X_val, X_test, y_train, y_val, y_test = split_dataset(subset_en)
 
 # scale data 
-scaler = StandardScaler()
+scaler = RobustScaler()
 X_train_scaled = scaler.fit_transform(X_train)
 X_val_scaled = scaler.transform(X_val)
 
-# Elastic Net Regression
+# train and evaluate model 
 elastic_net = train_elastic_net(X_train_scaled, y_train)
 print('Elastic Net Regressor')
 metrics_elastic_net = evaluate_model(elastic_net, X_train_scaled, X_val_scaled, y_train, y_val)
 print('\n')
 
+# Random Forest Regressor 
 # split data 
 X_train, X_val, X_test, y_train, y_val, y_test = split_dataset(subset_rfr)
 
@@ -101,11 +111,42 @@ feature_selector = SelectFromModel(rf_selector, threshold='median')
 X_train_selected = feature_selector.fit_transform(X_train, y_train)
 X_test_selected = feature_selector.transform(X_val)
 
-# Random Forest Regressor 
+# train and evaluate model 
 RFR = train_RFR(X_train_selected, y_train)
 print('Random Forest Regressor')
 metrics_RFR = evaluate_model(RFR, X_train_selected, X_test_selected, y_train, y_val)
 print('\n')
 
 
+# Gradient Boosting Regressor
+# split data
+X_train, X_val, X_test, y_train, y_val, y_test = split_dataset(subset_gbr)
+
+# feature selection
+gbr_selector = GradientBoostingRegressor(n_estimators=50, random_state=42)
+selector = SelectFromModel(gbr_selector, threshold='median')
+X_train_sel = selector.fit_transform(X_train, y_train)
+X_val_sel = selector.transform(X_val)
+
+# train and evaluate model 
+GBR = train_GBR(X_train_sel, y_train)
+print('Gradient Boosting Regressor')
+metrics_GBR = evaluate_model(GBR, X_train_sel, X_val_sel, y_train, y_val)
+print('\n')
+
+# XGBoost Regressor
+# split data
+X_train, X_val, X_test, y_train, y_val, y_test = split_dataset(subset_xgbr)
+
+# feature selection
+xgbr_selector = XGBRegressor(n_estimators=100, learning_rate=0.1, max_depth=6)
+selector = SelectFromModel(xgbr_selector, threshold='median')
+X_train_sel = selector.fit_transform(X_train, y_train)
+X_val_sel = selector.transform(X_val)
+
+# train and evaluate model 
+XGBR = train_XGBR(X_train_sel, y_train)
+print('XGBoost Regressor')
+metrics_XGBR = evaluate_model(XGBR, X_train_sel, X_val_sel, y_train, y_val)
+print('\n')
 

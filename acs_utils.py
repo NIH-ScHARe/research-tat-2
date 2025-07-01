@@ -122,11 +122,32 @@ def get_private_insurance_data():
     df.columns = df.iloc[0]
     df = df[1:].reset_index(drop=True)
 
-    data = df[['ucgid','S2703_C03_027E','S2703_C03_028E','S2703_C03_029E']].copy()
+    data = df[['ucgid','S2703_C01_002E','S2703_C03_006E','S2703_C03_010E']].copy()
 
     data['ucgid'] = data['ucgid'].astype(str).str[-5:]
-    data = data.rename(columns={'ucgid': 'FIPS','S2703_C03_027E': 'Employer-based health insurance alone',
-                                'S2703_C03_028E': 'Direct-purchase health insurance alone',
-                                'S2703_C03_029E': 'Tricare/military health coverage alone'})
+    data = data.rename(columns={'ucgid': 'FIPS','S2703_C01_002E': 'Employer-based health insurance alone or in combination',
+                                'S2703_C03_006E': 'Direct-purchase health insurance alone or in combination',
+                                'S2703_C03_010E': 'Tricare/military health insurance alone or in combination'})
+
+    return data
+
+def get_public_insurance_data():
+
+    url = 'https://api.census.gov/data/2022/acs/acs5/subject?get=group(S2704)&ucgid=pseudo(0100000US$0500000)'
+
+    table = requests.get(url)
+
+    df = pd.DataFrame(table.json())
+    
+    df.columns = df.iloc[0]
+    df = df[1:].reset_index(drop=True)
+
+    data = df[['ucgid','S2704_C03_002E','S2704_C03_006E','S2704_C03_010E']].copy()
+
+    data['ucgid'] = data['ucgid'].astype(str).str[-5:]
+    data = data.rename(columns={'ucgid': 'FIPS',
+                                'S2704_C03_002E': 'Medicare coverage alone or in combination',
+                                'S2704_C03_006E': 'Medicaid/means-tested public coverage alone or in combination',
+                                'S2704_C03_010E': 'VA health care coverage alone or in combination'})
 
     return data

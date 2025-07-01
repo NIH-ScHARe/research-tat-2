@@ -1,5 +1,8 @@
 import pandas as pd 
 import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt 
+import numpy as np
+import seaborn as sns
 
 def plot_distribution(data, column_name):
 
@@ -55,4 +58,20 @@ def explore_cleaned_data():
 
     data2.describe()
 
-explore_raw_data()
+def feature_correlation(features):
+
+    plt.figure(figsize=(7, 6))
+    correlation_matrix = features.corr()
+    mask = np.triu(np.ones_like(correlation_matrix, dtype=bool))
+    sns.heatmap(
+        correlation_matrix,
+        mask=mask,
+        annot=True,           # Show correlation values
+        cmap='coolwarm',
+        center=0,
+        fmt='.2f',            # Format to 2 decimal places
+        square=True
+    )
+    plt.title('Feature Correlation Matrix')
+    plt.tight_layout()
+    plt.show()

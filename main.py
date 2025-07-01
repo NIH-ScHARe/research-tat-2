@@ -14,12 +14,12 @@ if __name__ == "__main__":
     print('Features dataset loaded')
 
     # # clean dataset and prepare for model training 
-    dataset_clean = clean_dataset(dataset)
-    print('Dataset cleaned')
+    # dataset_clean = clean_dataset(dataset)
+    # print('Dataset cleaned')
 
-    # split the dataset for model training
-    X_train, X_val, X_test, y_train, y_val, y_test = split_dataset(dataset_clean)
-    print('Dataset split into training, validation, and test sets')
+    # # split the dataset for model training
+    # X_train, X_val, X_test, y_train, y_val, y_test = split_dataset(dataset_clean)
+    # print('Dataset split into training, validation, and test sets')
 
-    # train and evaluate the model 
-    train_eval_model(X_train, X_val, y_train, y_val)
+    # # train and evaluate the model 
+    # train_eval_model(X_train, X_val, y_train, y_val)

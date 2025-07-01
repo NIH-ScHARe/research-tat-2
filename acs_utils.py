@@ -1,5 +1,6 @@
 import pandas as pd 
 from fedwrap.census_acs import get_educational_attainment, get_household_income, get_computer_and_internet_use, get_GRAPI, get_language_spoken_at_home
+import requests 
 
 def get_language_data(year, geography, as_percent=False):
     """
@@ -109,3 +110,23 @@ def get_household_income_data(year, geography, as_percent=False):
     income_data = income_data.rename(columns={'ucgid': 'FIPS'})
 
     return income_data
+
+def get_private_insurance_data():
+    
+    url = 'https://api.census.gov/data/2022/acs/acs5/subject?get=group(S2703)&ucgid=pseudo(0100000US$0500000)'
+
+    table = requests.get(url)
+
+    df = pd.DataFrame(table.json())
+    
+    df.columns = df.iloc[0]
+    df = df[1:].reset_index(drop=True)
+
+    data = df[['ucgid','S2703_C03_027E','S2703_C03_028E','S2703_C03_029E']].copy()
+
+    data['ucgid'] = data['ucgid'].astype(str).str[-5:]
+    data = data.rename(columns={'ucgid': 'FIPS','S2703_C03_027E': 'Employer-based health insurance alone',
+                                'S2703_C03_028E': 'Direct-purchase health insurance alone',
+                                'S2703_C03_029E': 'Tricare/military health coverage alone'})
+
+    return data

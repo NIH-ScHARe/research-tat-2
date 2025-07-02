@@ -143,6 +143,8 @@ def evaluate_model(rf, X_train, X_test, y_train, y_test):
     print("=== Comprehensive Train-Val Comparison ===")
     print(df.round(4))
 
+    return df
+
 
 def train_eval_model(X_train, X_test, y_train, y_test):
     """

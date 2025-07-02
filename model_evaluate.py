@@ -38,6 +38,11 @@ features = ['Less than 9th grade',
             '30.0 to 34.9 percent',
             '35.0 percent or more',
             'English only',
+            'Spanish',
+            'Other Indo-European languages',
+            'Asian and Pacific Islander languages',
+            'Other languages',
+            'With a computer',
             'With a broadband Internet subscription',
             'doctor_visit_rate', 
             'self_care_disability_rate', 
@@ -150,3 +155,8 @@ print('XGBoost Regressor')
 metrics_XGBR = evaluate_model(XGBR, X_train_sel, X_val_sel, y_train, y_val)
 print('\n')
 
+# save metrics to CSV file 
+metrics_elastic_net.to_csv('model evaluation/metrics_elastic_net.csv', index=False)
+metrics_RFR.to_csv('model evaluation/metrics_RFR.csv', index=False)
+metrics_GBR.to_csv('model evaluation/metrics_GBR.csv', index=False)
+metrics_XGBR.to_csv('model evaluation/metrics_XGBR.csv', index=False)

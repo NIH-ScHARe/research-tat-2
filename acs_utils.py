@@ -1,5 +1,5 @@
 import pandas as pd 
-from fedwrap.census_acs import get_educational_attainment, get_household_income, get_computer_and_internet_use, get_GRAPI, get_language_spoken_at_home
+from fedwrap.census_acs import get_educational_attainment, get_household_income, get_computer_and_internet_use, get_GRAPI, get_language_spoken_at_home, get_pop_sex, get_race
 import requests 
 
 def get_language_data(year, geography, as_percent=False):
@@ -151,3 +151,45 @@ def get_public_insurance_data():
                                 'S2704_C03_010E': 'VA health care coverage alone or in combination'})
 
     return data
+
+def get_biological_sex_data(year, geography, as_percent=False):
+    """
+        Fetches biological sex data from the ACS for a given year and geography.
+        
+        Args:
+            year (str): The year of the ACS data to fetch.
+            geography (str): The type of geography to fetch data for (e.g., 'county').
+            as_percent (bool): If True, returns the data as percentages. Defaults to False.
+        
+        Returns:
+            pd.DataFrame: A DataFrame containing the educational attainment data.
+        """
+    # Fetch the educational attainment data
+    biological_sex_data = get_pop_sex(year, geography, as_percent=as_percent)
+    
+    # Replace the ucgid column with its last 5 characters (FIPS code) and rename to FIPS
+    biological_sex_data['ucgid'] = biological_sex_data['ucgid'].astype(str).str[-5:]
+    biological_sex_data = biological_sex_data.rename(columns={'ucgid': 'FIPS'})
+
+    return biological_sex_data
+
+def get_race_data(year, geography, as_percent=False):
+    """
+        Fetches race data from the ACS for a given year and geography.
+        
+        Args:
+            year (str): The year of the ACS data to fetch.
+            geography (str): The type of geography to fetch data for (e.g., 'county').
+            as_percent (bool): If True, returns the data as percentages. Defaults to False.
+        
+        Returns:
+            pd.DataFrame: A DataFrame containing the educational attainment data.
+        """
+    # Fetch the educational attainment data
+    race_data = get_race(year, geography, as_percent=as_percent)
+    
+    # Replace the ucgid column with its last 5 characters (FIPS code) and rename to FIPS
+    race_data['ucgid'] = race_data['ucgid'].astype(str).str[-5:]
+    race_data = race_data.rename(columns={'ucgid': 'FIPS'})
+
+    return race_data

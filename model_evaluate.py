@@ -60,7 +60,15 @@ features = ['Less than 9th grade',
             'Tricare/military health insurance alone or in combination',
             'Medicare coverage alone or in combination',
             'Medicaid/means-tested public coverage alone or in combination',
-            'VA health care coverage alone or in combination']
+            'VA health care coverage alone or in combination',
+            'Male',
+            'Female',
+            'White',
+            'Black or African American',
+            'American Indian and Alaska Native',
+            'Asian',
+            'Native Hawaiian and Other Pacific Islander',
+            'Some Other Race']
 subset = raw_data[[id, target] + features].copy()
 
 # drop rows with missing target values 

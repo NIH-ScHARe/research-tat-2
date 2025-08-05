@@ -1,11 +1,14 @@
 import pandas as pd 
 from data_clean import clean_dataset 
-from data_split import split_dataset
+from data_split import split_dataset_cv
 from data_train import train_elastic_net, train_RFR, train_GBR, train_XGBR, evaluate_model
 from data_engineer import engineer_all
 from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
 from xgboost import XGBRegressor
+from sklearn.model_selection import cross_val_score, cross_validate
+from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler, RobustScaler
+from sklearn.linear_model import ElasticNet
 from sklearn.feature_selection import SelectKBest, f_regression, SelectFromModel
 
 from data_explore import feature_correlation
@@ -91,6 +94,9 @@ subset_en = subset.copy()
 subset_gbr = subset.copy()
 subset_xgbr = subset.copy()
 
+# define scoring 
+scoring = ['neg_mean_absolute_error', 'neg_root_mean_squared_error','r2']
+
 # address outliers 
 
 # FEATURE ENGINEERING 
@@ -99,72 +105,88 @@ subset_rfr = engineer_all(subset_rfr, drop=False)
 subset_gbr = engineer_all(subset_gbr, drop=False)
 subset_xgbr = engineer_all(subset_xgbr, drop=False)
 
-# Elastic Net Regression
+# Elastic Net Regression 
+
 # split data 
-X_train, X_val, X_test, y_train, y_val, y_test = split_dataset(subset_en)
+X_train, X_test, y_train, y_test = split_dataset_cv(subset_en)
 
-# scale data 
-scaler = RobustScaler()
-X_train_scaled = scaler.fit_transform(X_train)
-X_val_scaled = scaler.transform(X_val)
+# define pipeline with scaling 
+clf = make_pipeline(RobustScaler(),
+                    ElasticNet(alpha=1.0, l1_ratio=0.5, random_state=42))
 
-# train and evaluate model 
-elastic_net = train_elastic_net(X_train_scaled, y_train)
-print('Elastic Net Regressor')
-metrics_elastic_net = evaluate_model(elastic_net, X_train_scaled, X_val_scaled, y_train, y_val)
-print('\n')
+cv_scores = cross_validate(clf, X_train, y_train, cv=5, scoring=scoring)
 
-# Random Forest Regressor 
-# split data 
-X_train, X_val, X_test, y_train, y_val, y_test = split_dataset(subset_rfr)
+# print cv scores
+for metric in scoring:
+    scores = cv_scores[f'test_{metric}']
+    print(f"{metric.capitalize()}: {scores.mean():.4f} (+/- {scores.std() * 2:.4f})")
 
-# Feature Selection 
-rf_selector = RandomForestRegressor(n_estimators=100, random_state=42)
-feature_selector = SelectFromModel(rf_selector, threshold='median')
-X_train_selected = feature_selector.fit_transform(X_train, y_train)
-X_test_selected = feature_selector.transform(X_val)
+# # Elastic Net Regression
+# # split data 
+# X_train, X_val, X_test, y_train, y_val, y_test = split_dataset(subset_en)
 
-# train and evaluate model 
-RFR = train_RFR(X_train_selected, y_train)
-print('Random Forest Regressor')
-metrics_RFR = evaluate_model(RFR, X_train_selected, X_test_selected, y_train, y_val)
-print('\n')
+# # scale data 
+# scaler = RobustScaler()
+# X_train_scaled = scaler.fit_transform(X_train)
+# X_val_scaled = scaler.transform(X_val)
+
+# # train and evaluate model 
+# elastic_net = train_elastic_net(X_train_scaled, y_train)
+# print('Elastic Net Regressor')
+# metrics_elastic_net = evaluate_model(elastic_net, X_train_scaled, X_val_scaled, y_train, y_val)
+# print('\n')
+
+# # Random Forest Regressor 
+# # split data 
+# X_train, X_val, X_test, y_train, y_val, y_test = split_dataset(subset_rfr)
+
+# # Feature Selection 
+# rf_selector = RandomForestRegressor(n_estimators=100, random_state=42)
+# feature_selector = SelectFromModel(rf_selector, threshold='median')
+# X_train_selected = feature_selector.fit_transform(X_train, y_train)
+# X_test_selected = feature_selector.transform(X_val)
+
+# # train and evaluate model 
+# RFR = train_RFR(X_train_selected, y_train)
+# print('Random Forest Regressor')
+# metrics_RFR = evaluate_model(RFR, X_train_selected, X_test_selected, y_train, y_val)
+# print('\n')
 
 
-# Gradient Boosting Regressor
-# split data
-X_train, X_val, X_test, y_train, y_val, y_test = split_dataset(subset_gbr)
+# # Gradient Boosting Regressor
+# # split data
+# X_train, X_val, X_test, y_train, y_val, y_test = split_dataset(subset_gbr)
 
-# feature selection
-gbr_selector = GradientBoostingRegressor(n_estimators=50, random_state=42)
-selector = SelectFromModel(gbr_selector, threshold='median')
-X_train_sel = selector.fit_transform(X_train, y_train)
-X_val_sel = selector.transform(X_val)
+# # feature selection
+# gbr_selector = GradientBoostingRegressor(n_estimators=50, random_state=42)
+# selector = SelectFromModel(gbr_selector, threshold='median')
+# X_train_sel = selector.fit_transform(X_train, y_train)
+# X_val_sel = selector.transform(X_val)
 
-# train and evaluate model 
-GBR = train_GBR(X_train_sel, y_train)
-print('Gradient Boosting Regressor')
-metrics_GBR = evaluate_model(GBR, X_train_sel, X_val_sel, y_train, y_val)
-print('\n')
+# # train and evaluate model 
+# GBR = train_GBR(X_train_sel, y_train)
+# print('Gradient Boosting Regressor')
+# metrics_GBR = evaluate_model(GBR, X_train_sel, X_val_sel, y_train, y_val)
+# print('\n')
 
-# XGBoost Regressor
-# split data
-X_train, X_val, X_test, y_train, y_val, y_test = split_dataset(subset_xgbr)
+# # XGBoost Regressor
+# # split data
+# X_train, X_val, X_test, y_train, y_val, y_test = split_dataset(subset_xgbr)
 
-# feature selection
-xgbr_selector = XGBRegressor(n_estimators=100, learning_rate=0.1, max_depth=6)
-selector = SelectFromModel(xgbr_selector, threshold='median')
-X_train_sel = selector.fit_transform(X_train, y_train)
-X_val_sel = selector.transform(X_val)
+# # feature selection
+# xgbr_selector = XGBRegressor(n_estimators=100, learning_rate=0.1, max_depth=6)
+# selector = SelectFromModel(xgbr_selector, threshold='median')
+# X_train_sel = selector.fit_transform(X_train, y_train)
+# X_val_sel = selector.transform(X_val)
 
-# train and evaluate model 
-XGBR = train_XGBR(X_train_sel, y_train)
-print('XGBoost Regressor')
-metrics_XGBR = evaluate_model(XGBR, X_train_sel, X_val_sel, y_train, y_val)
-print('\n')
+# # train and evaluate model 
+# XGBR = train_XGBR(X_train_sel, y_train)
+# print('XGBoost Regressor')
+# metrics_XGBR = evaluate_model(XGBR, X_train_sel, X_val_sel, y_train, y_val)
+# print('\n')
 
-# save metrics to CSV file 
-metrics_elastic_net.to_csv('model evaluation/metrics_elastic_net.csv', index=False)
-metrics_RFR.to_csv('model evaluation/metrics_RFR.csv', index=False)
-metrics_GBR.to_csv('model evaluation/metrics_GBR.csv', index=False)
-metrics_XGBR.to_csv('model evaluation/metrics_XGBR.csv', index=False)
+# # save metrics to CSV file 
+# metrics_elastic_net.to_csv('model evaluation/metrics_elastic_net.csv', index=False)
+# metrics_RFR.to_csv('model evaluation/metrics_RFR.csv', index=False)
+# metrics_GBR.to_csv('model evaluation/metrics_GBR.csv', index=False)
+# metrics_XGBR.to_csv('model evaluation/metrics_XGBR.csv', index=False)

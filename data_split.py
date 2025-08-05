@@ -43,3 +43,22 @@ def split_dataset(dataset, target_column='mortality_rate', test_size=0.2, val_si
     y = dataset[target_column]
     
     return split_for_random_forest(X, y, test_size, val_size, random_state)
+
+def split_dataset_cv(dataset, target_column='mortality_rate', test_size=0.2, random_state=42):
+    """
+    Splits the dataset into training and test sets for cross-validation.
+
+    Args:
+        dataset (pd.DataFrame): The dataset to split.
+        target_column (str): The name of the target column.
+        test_size (float): Proportion of the dataset to include in the test split.
+        random_state (int): Random seed for reproducibility.
+
+    Returns:
+        X_train, X_test, y_train, y_test: Split datasets.
+    """
+    # Separate features and target
+    X = dataset.drop(columns=['FIPS',target_column])
+    y = dataset[target_column]
+    
+    return train_test_split(X, y, test_size=test_size, random_state=random_state) 

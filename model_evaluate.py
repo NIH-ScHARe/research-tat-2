@@ -1,17 +1,9 @@
 import pandas as pd 
 from data_clean import clean_dataset 
-from data_split import split_dataset_cv
-from data_train import train_elastic_net, train_RFR, train_GBR, train_XGBR, evaluate_model
+from data_train import train_elastic_net, train_RFR, train_GBR, train_XGBR
 from data_engineer import engineer_all
-from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
-from xgboost import XGBRegressor
-from sklearn.model_selection import cross_val_score, cross_validate
-from sklearn.pipeline import make_pipeline
-from sklearn.preprocessing import StandardScaler, RobustScaler
-from sklearn.linear_model import ElasticNet
-from sklearn.feature_selection import SelectKBest, f_regression, SelectFromModel
-from model_output import save_cv_scores
 from data_explore import feature_correlation
+from model_feature_importance import get_rfr_importance
 
 raw_data = pd.read_csv('dataset_raw.csv')
 
@@ -106,9 +98,12 @@ subset_gbr = engineer_all(subset_gbr, drop=False)
 subset_xgbr = engineer_all(subset_xgbr, drop=False)
 
 # TRAINING AND CROSS VALIDATION 
-train_elastic_net(subset_en, scoring)
+# train_elastic_net(subset_en, scoring)
 train_RFR(subset_rfr, scoring)
-train_GBR(subset_gbr, scoring)
-train_XGBR(subset_xgbr, scoring)
+# train_GBR(subset_gbr, scoring)
+# train_XGBR(subset_xgbr, scoring)
+
+# FEATURE IMPORTANCE 
+get_rfr_importance(subset_rfr)
 
 

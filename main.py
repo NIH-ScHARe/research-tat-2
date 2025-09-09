@@ -9,7 +9,7 @@ if __name__ == "__main__":
     dataset = load_target()
     print('Target dataset loaded')
 
-    # # Load education and income data
+    # # Load all remaining data (features)
     dataset = load_features(dataset)
     print('Features dataset loaded')
 

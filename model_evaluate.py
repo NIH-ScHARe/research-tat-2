@@ -98,10 +98,10 @@ subset_gbr = engineer_all(subset_gbr, drop=False)
 subset_xgbr = engineer_all(subset_xgbr, drop=False)
 
 # TRAINING AND CROSS VALIDATION 
-# train_elastic_net(subset_en, scoring)
+train_elastic_net(subset_en, scoring)
 train_RFR(subset_rfr, scoring)
-# train_GBR(subset_gbr, scoring)
-# train_XGBR(subset_xgbr, scoring)
+train_GBR(subset_gbr, scoring)
+train_XGBR(subset_xgbr, scoring)
 
 # FEATURE IMPORTANCE 
 get_rfr_importance(subset_rfr)

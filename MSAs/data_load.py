@@ -1,5 +1,5 @@
 import pandas as pd 
-from acs_utils import get_race_data 
+from acs_utils import get_race_data, get_education_data
 
 def load_mortality_data() -> pd.DataFrame:
     """
@@ -18,8 +18,25 @@ def load_mortality_data() -> pd.DataFrame:
     # keep the MSA, MSA code, and age-adjusted rate columns 
     mortality_data = mortality_data[['MSA', 'MSA Code', 'Year', 'Age-Adjusted Rate']]
 
+    # drop empty rows 
+    mortality_data = mortality_data.dropna()
+
     # make the MSA Code variable an integer 
     mortality_data['MSA Code'] = mortality_data['MSA Code'].astype(int)
+
+    # make the year variable an integer 
+    mortality_data['Year'] = mortality_data['Year'].astype(int)
+
+    # drop the rows where the MSA Code is 99999
+    mortality_data = mortality_data[mortality_data['MSA Code'] != 99999]
+
+    # rename columns 
+    mortality_data = mortality_data.rename(columns={
+        'MSA': 'msa_text',
+        'MSA Code': 'msa_code',
+        'Year': 'year',
+        'Age-Adjusted Rate': 'mortality_rate'
+    })
 
     return mortality_data 
 
@@ -34,13 +51,36 @@ def load_features(dataset) -> pd.DataFrame:
         pd.DataFrame: The dataset enriched with features to be used for prediction.
     """
     
+    # # Load racial data
+    # for year in dataset['Year'].unique():
+    #     print(f'Loading racial data for the year {year}...') 
+
+    #     race_data = get_race_data(str(year), 'MSA', as_percent=True)
+    
+    #     # add column for year as int64
+    #     race_data['Year'] = pd.Series(year, index=race_data.index, dtype='int64')
+
+    #     # merge to the full dataset on year and MSA code 
+    #     dataset = pd.merge(dataset, race_data, on=["MSA Code", "Year"], how='left')
+
+    # return dataset 
+
     # Load education data
-    print('Loading race data...')
-    race_data = get_race_data('2018', 'MSA', as_percent=True)
-    dataset_2018 = dataset[dataset['Year'] == 2018]
-    dataset_2018 = dataset_2018.merge(race_data, on='MSA Code', how='left')
-    dataset = pd.concat([dataset[dataset['Year'] != 2018], dataset_2018], ignore_index=True)
+    all_year_data = []
+    for year in dataset['year'].unique():
+        print(f'Loading education data for the year {year}...') 
 
-    return dataset 
+        year_data = get_education_data(str(year), 'MSA', as_percent=True)
+    
+        # add column for year as int64
+        year_data['year'] = pd.Series(year, index=year_data.index, dtype='int64')
 
+        all_year_data.append(year_data)
+
+    education_data = pd.concat(all_year_data, ignore_index=True)
+
+    # merge to the full dataset on year and MSA code 
+    dataset = pd.merge(dataset, education_data, on=["msa_code", "year"], how='left')
+
+    return dataset
 

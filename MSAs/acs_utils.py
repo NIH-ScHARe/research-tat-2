@@ -1,4 +1,4 @@
-from fedwrap.census_acs import get_race, get_educational_attainment
+from fedwrap.census_acs import get_race, get_educational_attainment, get_household_income
 
 
 def get_race_data(year, geography, as_percent=False):
@@ -18,7 +18,7 @@ def get_race_data(year, geography, as_percent=False):
     
     # Replace the ucgid column with its last 5 characters (FIPS code) and rename to FIPS
     race_data['ucgid'] = race_data['ucgid'].astype(str).str[-5:].astype(int)
-    race_data = race_data.rename(columns={'ucgid': 'MSA Code'})
+    race_data = race_data.rename(columns={'ucgid': 'msa_code'})
 
     return race_data
 
@@ -42,3 +42,24 @@ def get_education_data(year, geography, as_percent=False):
     data = data.rename(columns={'ucgid': 'msa_code'})
 
     return data
+
+def get_household_income_data(year, geography, as_percent=False):
+    """
+        Fetches educational attainment data from the ACS for a given year and geography.
+        
+        Args:
+            year (str): The year of the ACS data to fetch.
+            geography (str): The type of geography to fetch data for (e.g., 'county').
+            as_percent (bool): If True, returns the data as percentages. Defaults to False.
+        
+        Returns:
+            pd.DataFrame: A DataFrame containing the educational attainment data.
+        """
+    # Fetch the educational attainment data
+    income_data = get_household_income(year, geography, as_percent=as_percent)
+    
+    # Replace the ucgid column with its last 5 characters (FIPS code) and rename to FIPS
+    income_data['ucgid'] = income_data['ucgid'].astype(str).str[-5:].astype(int)
+    income_data = income_data.rename(columns={'ucgid': 'msa_code'})
+
+    return income_data

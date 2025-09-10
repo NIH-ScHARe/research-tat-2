@@ -1,5 +1,5 @@
 import pandas as pd 
-from acs_utils import get_race_data, get_education_data
+from acs_utils import get_race_data, get_education_data, get_household_income_data
 
 def load_mortality_data() -> pd.DataFrame:
     """
@@ -10,7 +10,7 @@ def load_mortality_data() -> pd.DataFrame:
     """
 
     # load mortality data from the csv file 
-    mortality_data = pd.read_csv('data/mortality_msas.csv')
+    mortality_data = pd.read_csv('MSAs/data/mortality_msas.csv')
 
     # drop all rows where notes column is total 
     mortality_data = mortality_data[mortality_data['Notes'] != 'Total']
@@ -79,8 +79,28 @@ def load_features(dataset) -> pd.DataFrame:
 
     education_data = pd.concat(all_year_data, ignore_index=True)
 
-    # merge to the full dataset on year and MSA code 
     dataset = pd.merge(dataset, education_data, on=["msa_code", "year"], how='left')
+
+    # Load education data
+    all_year_data = []
+    for year in dataset['year'].unique():
+        print(f'Loading income data for the year {year}...') 
+
+        year_data = get_household_income_data(str(year), 'MSA', as_percent=True)
+    
+        # add column for year as int64
+        year_data['year'] = pd.Series(year, index=year_data.index, dtype='int64')
+
+        all_year_data.append(year_data)
+
+    income_data = pd.concat(all_year_data, ignore_index=True)
+
+    # merge to the full dataset on year and MSA code 
+    dataset = pd.merge(dataset, income_data, on=["msa_code", "year"], how='left')
 
     return dataset
 
+def load_data():
+    data = load_mortality_data()
+    data = load_features(data)
+    data.to_csv('MSAs/data/data_00_raw.csv', index=False)

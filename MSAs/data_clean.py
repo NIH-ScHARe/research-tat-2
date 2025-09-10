@@ -28,3 +28,8 @@ def drop_incomplete_msas(df, msa_col="msa_code", year_col="year"):
     
     # Keep only those MSAs
     return df[df[msa_col].isin(complete_msas)].copy()
+
+def clean_data():
+    data = pd.read_csv('MSAs/data/data_00_raw.csv')
+    data = drop_incomplete_msas(data, msa_col="msa_code", year_col="year")
+    data.to_csv('MSAs/data/data_01_clean.csv', index=False)

@@ -1,5 +1,6 @@
 from fedwrap.census_acs import get_race, get_educational_attainment, get_household_income
-
+import requests
+import pandas as pd 
 
 def get_race_data(year, geography, as_percent=False):
     """
@@ -21,6 +22,8 @@ def get_race_data(year, geography, as_percent=False):
     race_data = race_data.rename(columns={'ucgid': 'msa_code'})
 
     return race_data
+
+
 
 def get_education_data(year, geography, as_percent=False):
     """
@@ -63,3 +66,23 @@ def get_household_income_data(year, geography, as_percent=False):
     income_data = income_data.rename(columns={'ucgid': 'msa_code'})
 
     return income_data
+
+def get_private_insurance_data(year: str, geography, as_percent=False) -> pd.DataFrame:
+    
+    url = 'https://api.census.gov/data/' + year + '/acs/acs5/subject?get=group(S2703)&ucgid=pseudo(0100000US$31000M1)'
+
+    table = requests.get(url)
+
+    df = pd.DataFrame(table.json())
+    
+    df.columns = df.iloc[0]
+    df = df[1:].reset_index(drop=True)
+
+    data = df[['ucgid','S2703_C03_002E','S2703_C03_006E','S2703_C03_010E']].copy()
+
+    data = data.rename(columns={'S2703_C03_002E': 'employer_based_health_insurance',
+                                'S2703_C03_006E': 'direct_purchase_health_insurance',
+                                'S2703_C03_010E': 'tricare_health_insurance'})
+
+    return data
+

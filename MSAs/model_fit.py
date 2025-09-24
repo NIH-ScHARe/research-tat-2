@@ -6,11 +6,14 @@ def fit_model():
     data = pd.read_csv('MSAs/data/data_02_engineered.csv')
 
     formula = (
-        "mortality_rate ~ year_centered + hs + college_plus + middle_income + high_income + english_only"
+        "mortality_rate ~ year_centered + hs + college_plus + middle_income + high_income + english_only + " \
+        "employer_based_health_insurance + direct_purchase_health_insurance + tricare_health_insurance"
     )
 
     cols = ["mortality_rate", "year_centered", "hs", "college_plus",
-            "middle_income", "high_income", "english_only", "msa_code"]
+            "middle_income", "high_income", "english_only", 
+            "employer_based_health_insurance", "direct_purchase_health_insurance",
+             "tricare_health_insurance", "msa_code"]
 
     data = data[cols]
 

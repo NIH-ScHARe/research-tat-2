@@ -1,5 +1,5 @@
 import pandas as pd 
-from acs_utils import get_race_data, get_education_data, get_household_income_data
+from fedwrap.census_acs import get_educational_attainment, get_household_income, get_language_spoken_at_home
 
 def load_mortality_data() -> pd.DataFrame:
     """
@@ -40,6 +40,35 @@ def load_mortality_data() -> pd.DataFrame:
 
     return mortality_data 
 
+def get_data_over_years(
+        dataset: pd.DataFrame, 
+        fetch_fn,
+        year_col: str = "year",
+):
+    
+    years = pd.Index(dataset[year_col].unique()).astype(str)
+    frames = [] 
+
+    for year in years:
+        print(f'Using function {str(fetch_fn)} and loading data for the year {year}...') 
+
+        # Fetch data from the ACS API
+        year_data = fetch_fn(year, 'MSA', as_percent=True)
+        
+        # Replace the ucgid column with its last 5 characters (FIPS code) and rename to FIPS
+        year_data['ucgid'] = year_data['ucgid'].astype(str).str[-5:].astype(int)
+        year_data = year_data.rename(columns={'ucgid': 'msa_code'})
+
+        # add column for year as int64
+        year_data[year_col] = int(year)
+
+        frames.append(year_data)
+
+    education_data = pd.concat(frames, ignore_index=True)
+
+    return pd.merge(dataset, education_data, on=["msa_code", "year"], how='left') 
+    
+
 def load_features(dataset) -> pd.DataFrame:
     """
     Load additional features (education and income) into the dataset.
@@ -51,54 +80,16 @@ def load_features(dataset) -> pd.DataFrame:
         pd.DataFrame: The dataset enriched with features to be used for prediction.
     """
     
-    # # Load racial data
-    # for year in dataset['Year'].unique():
-    #     print(f'Loading racial data for the year {year}...') 
+    fetch_fns = [
+        get_educational_attainment,
+        get_household_income,
+        get_language_spoken_at_home
+    ]
 
-    #     race_data = get_race_data(str(year), 'MSA', as_percent=True)
-    
-    #     # add column for year as int64
-    #     race_data['Year'] = pd.Series(year, index=race_data.index, dtype='int64')
+    for fetch_fn in fetch_fns:
+        dataset = get_data_over_years(dataset, fetch_fn)
 
-    #     # merge to the full dataset on year and MSA code 
-    #     dataset = pd.merge(dataset, race_data, on=["MSA Code", "Year"], how='left')
-
-    # return dataset 
-
-    # Load education data
-    all_year_data = []
-    for year in dataset['year'].unique():
-        print(f'Loading education data for the year {year}...') 
-
-        year_data = get_education_data(str(year), 'MSA', as_percent=True)
-    
-        # add column for year as int64
-        year_data['year'] = pd.Series(year, index=year_data.index, dtype='int64')
-
-        all_year_data.append(year_data)
-
-    education_data = pd.concat(all_year_data, ignore_index=True)
-
-    dataset = pd.merge(dataset, education_data, on=["msa_code", "year"], how='left')
-
-    # Load education data
-    all_year_data = []
-    for year in dataset['year'].unique():
-        print(f'Loading income data for the year {year}...') 
-
-        year_data = get_household_income_data(str(year), 'MSA', as_percent=True)
-    
-        # add column for year as int64
-        year_data['year'] = pd.Series(year, index=year_data.index, dtype='int64')
-
-        all_year_data.append(year_data)
-
-    income_data = pd.concat(all_year_data, ignore_index=True)
-
-    # merge to the full dataset on year and MSA code 
-    dataset = pd.merge(dataset, income_data, on=["msa_code", "year"], how='left')
-
-    return dataset
+    return dataset 
 
 def load_data():
     data = load_mortality_data()

@@ -25,5 +25,12 @@ def engineer_data():
                                     data["$150,000 to $199,999"] +
                                     data["$200,000 or more"],1)
 
+    # create non-English speaking categories 
+    data["english_only"] = data["English only"]
+    data['non_english_speaking'] = round(data["Spanish"] + 
+                                         data["Other Indo-European languages"] +
+                                         data["Asian and Pacific Islander languages"] + 
+                                         data["Other languages"],1)
+
     # save engineered data to file 
     data.to_csv('MSAs/data/data_02_engineered.csv', index=False)

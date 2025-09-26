@@ -86,3 +86,21 @@ def get_private_insurance_data(year: str, geography, as_percent=False) -> pd.Dat
 
     return data
 
+def get_public_insurance_data(year: str, geography, as_percent=False) -> pd.DataFrame:
+
+    url = 'https://api.census.gov/data/' + year + '/acs/acs5/subject?get=group(S2704)&ucgid=pseudo(0100000US$31000M1)'
+
+    table = requests.get(url)
+
+    df = pd.DataFrame(table.json())
+    
+    df.columns = df.iloc[0]
+    df = df[1:].reset_index(drop=True)
+
+    data = df[['ucgid','S2704_C03_002E','S2704_C03_006E','S2704_C03_010E']].copy()
+
+    data = data.rename(columns={'S2704_C03_002E': 'medicare',
+                                'S2704_C03_006E': 'medicaid',
+                                'S2704_C03_010E': 'VA'})
+
+    return data

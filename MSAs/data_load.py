@@ -1,6 +1,6 @@
 import pandas as pd 
 from fedwrap.census_acs import get_educational_attainment, get_household_income, get_language_spoken_at_home
-from acs_utils import get_private_insurance_data
+from acs_utils import get_private_insurance_data, get_public_insurance_data
 
 def load_mortality_data() -> pd.DataFrame:
     """
@@ -85,7 +85,8 @@ def load_features(dataset) -> pd.DataFrame:
         get_educational_attainment,
         get_household_income,
         get_language_spoken_at_home,
-        get_private_insurance_data
+        get_private_insurance_data,
+        get_public_insurance_data
     ]
 
     for fetch_fn in fetch_fns:
